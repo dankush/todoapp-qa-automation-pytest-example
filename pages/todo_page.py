@@ -10,7 +10,7 @@ class CoolTodoPage:
 
         # --- Core Locators ---
         # Main page elements
-        self.page_title: Locator = page.locator('h2:has-text("Tasks")')
+        self.page_title: Locator = page.locator('[data-testid="task-container"] h3')
         self.add_task_button: Locator = page.locator('button.MuiButtonBase-root[aria-label="Add Task"]')
         self.task_containers: Locator = page.locator('div[data-testid="task-container"]')
         self.search_input: Locator = page.locator('input[placeholder="Search for task..."]')

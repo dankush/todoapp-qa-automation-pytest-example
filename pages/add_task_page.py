@@ -64,8 +64,8 @@ class AddTaskPage:
         self.create_task_button.click()
         # Wait for navigation to complete
         self.page.wait_for_url("**/")
-        # Wait for the task list page to load
-        expect(self.page.locator('h2:has-text("Tasks")')).to_be_visible(timeout=10000)
+        # Wait for the task to appear in the list
+        expect(self.page.locator('[data-testid="task-container"] h3')).to_be_visible(timeout=5000)
 
     def add_complete_task(self, name: str, description: str = "", deadline: str = "", color_index: int = 0) -> None:
         """Adds a complete task with all details."""
