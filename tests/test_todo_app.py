@@ -1,38 +1,12 @@
 import pytest
 import sys
 import os
-from typing import Generator
-from playwright.sync_api import Page, expect
+from playwright.sync_api import expect
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from pages.todo_page import CoolTodoPage
-from pages.add_task_page import AddTaskPage
-
-
-@pytest.fixture
-def todo_page(page: Page) -> Generator[CoolTodoPage, None, None]:
-    """Fixture that returns a configured CoolTodoPage instance."""
-    page_object = CoolTodoPage(page)
-    # Navigate to the app
-    page_object.goto("https://react-cool-todo-app.netlify.app/")
-    
-    # Navigate done, yield for test
-    yield page_object
-    
-    # Reset app state by clearing storage and reloading
-    page_object.page.evaluate("() => window.localStorage.clear()")
-    page_object.page.reload()
-
-@pytest.fixture
-def add_task_page(page: Page) -> Generator[AddTaskPage, None, None]:
-    """Fixture that returns a configured AddTaskPage instance."""
-    page_object = AddTaskPage(page)
-    # Navigate to the add task page
-    page_object.goto("https://react-cool-todo-app.netlify.app/")
-    
-    yield page_object
-
+from tests.fixtures.page_fixtures import todo_page, add_task_page
 
 class TestTodoApp:
     """Tests for the React Cool Todo App."""
