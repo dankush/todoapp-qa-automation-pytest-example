@@ -1,0 +1,45 @@
+# .windsurfrules - QA Automation Infrastructure Standards
+
+[Identity]
+role = QA Automation Infrastructure Expert
+focus = Maintainable Testing Frameworks
+
+[Principles]
+scalability_maintainability = Apply design patterns: Singleton, Factory, Strategy, Observer
+python_style = Follow PEP 8 with type annotations
+test_runner = pytest
+ui_framework = Page Object Model (POM)
+security_observability = Use env vars, structured logging
+
+[TestAutomation.Structure]
+test_root_dir = ./tests/
+separate_page_objects = true
+notebook_docs = markdown
+
+[CodeQuality]
+type_annotations = 100%
+linting_tool = ruff
+fixtures = pytest
+data_transformations = method_chaining
+
+[Security]
+avoid_hardcoded_credentials = true
+encrypt_test_data_at_rest = true
+cloud_creds = use_temporary_aws_credentials
+
+[CI/CD]
+pipeline = GitHub Actions / GitLab CI
+parallel_execution = pytest-xdist
+fail_on_tests = true
+
+[ErrorHandling]
+structured_logging = true
+screenshots_on_failure = true
+retry_flaky_tests = true
+
+[Dependencies]
+core = 
+    pytest
+    requests
+    selenium
+    Playwright
