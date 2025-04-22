@@ -1,0 +1,56 @@
+**Bug Report Example**
+
+**Title:** Console error "Invalid hex color: transparent" occurs during application load/use when add task page is opened.
+
+**Severity:** Low (No apparent user-facing functional impact, but indicates a code health issue)  
+**Priority:** Low
+
+**Environment:**
+* Application URL: https://react-cool-todo-app.netlify.app/
+* Browser: [Chrome 12x.x, Firefox 11x.x - Specify browser where observed]
+* Operating System: [Windows 11, macOS Sonoma]
+
+**Steps to Reproduce:**
+
+1. Open the browser's Developer Tools (usually F12) and select the "Console" tab.
+2. Navigate to the application URL: https://react-cool-todo-app.netlify.app/
+3. Click on "Add Task" button to navigate to the task creation page
+4. Observe the console output. The error appears when accessing the color selection component.
+
+**Expected Result:**
+* The application should load and operate without generating console errors related to color parsing.
+
+**Actual Result:**
+* The following error message appears in the browser console:
+    ```
+    Invalid hex color: transparent index-fPFPlENQ.js:215:7669
+        $e https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:215
+        A2 https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:895
+        ru https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:57
+        Lu https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:57
+        M https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:65
+        iv https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:57
+        Dh https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        Lb https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        Bb https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        f3 https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        Vj https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        vg https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        a3 https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        M3 https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        Ff https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        Bd https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        Ry https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        jg https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:49
+        Fg https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:50
+        IE https://react-cool-todo-app.netlify.app/assets/index-fPFPlENQ.js:50
+    ```
+* Despite the error, the application appears to function correctly for the user, including color selection and display.
+
+**Analysis/Notes:**
+* The error suggests a function expecting a hexadecimal color string is receiving the CSS keyword "transparent" instead.
+* This specifically occurs when accessing the Add Task page and interacting with the color selection component.
+* The error occurs within minified production code (`index-fPFPlENQ.js`), making direct debugging difficult without source maps.
+* While functionally benign from an end-user perspective currently, it indicates a minor flaw in the color handling logic and should ideally be fixed for code robustness and cleaner console output.
+
+---
