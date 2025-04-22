@@ -1,11 +1,12 @@
 # Regression Test Cases – React Cool Todo App
 
-This document outlines the initial set of regression test cases covering core Create, Search, and Delete user flows. These test cases are aligned with the application’s current UI and functionality and follow the structure of well-documented, maintainable automated scripts using the Playwright + Pytest stack.
+This document outlines the initial set of regression test cases covering core Create, Search, and Delete user flows. These test cases are aligned with the application's current UI and functionality and follow the structure of well-documented, maintainable automated scripts using the Playwright + Pytest stack.
 
 ---
 
-## Test Case ID: TC_REG_001
+## Create Task Functionality
 
+**Test Case ID:** TC_REG_001  
 **Title:** Verify successful creation of a basic task  
 **Priority:** Critical  
 **Type:** Functional, Positive, Regression  
@@ -19,10 +20,10 @@ This document outlines the initial set of regression test cases covering core Cr
 
 ### Test Steps
 
-1. Click on the “Add Task” button
+1. Click on the "Add Task" button
 2. Wait for the "Add New Task" page (`/add`) to load
 3. Enter a unique task title (e.g., "Test Task")
-4. Click on the “Create Task” button
+4. Click on the "Create Task" button
 5. Wait for redirection to the main Todo page
 
 ### Expected Results
@@ -33,8 +34,9 @@ This document outlines the initial set of regression test cases covering core Cr
 
 ---
 
-## Test Case ID: TC_REG_002
+## Delete Task Functionality
 
+**Test Case ID:** TC_REG_002  
 **Title:** Verify successful deletion of a task via menu confirmation  
 **Priority:** Critical  
 **Type:** Functional, Positive, Regression  
@@ -48,7 +50,7 @@ This document outlines the initial set of regression test cases covering core Cr
 
 1. Locate the target task card
 2. Click the "task menu" (three-dot button)
-3. Select “Delete” from the dropdown
+3. Select "Delete" from the dropdown
 4. Confirm deletion in the modal dialog
 
 ### Expected Results
@@ -58,9 +60,10 @@ This document outlines the initial set of regression test cases covering core Cr
 
 ---
 
-## Test Case ID: TC_REG_003
+## Search Functionality - Filtering
 
-**Title:** Verify searching for a specific task filters results accurately  
+**Test Case ID:** TC_REG_003  
+**Title:** Verify keyword-based task filtering displays matching results only  
 **Priority:** High  
 **Type:** Functional, Positive, Regression  
 **Functionality Area:** Search
@@ -71,7 +74,7 @@ This document outlines the initial set of regression test cases covering core Cr
 
 ### Test Steps
 
-1. Type “Unique” into the search input field
+1. Type "Unique" into the search input field
 2. Wait for the filtered results
 
 ### Expected Results
@@ -82,9 +85,10 @@ This document outlines the initial set of regression test cases covering core Cr
 
 ---
 
-## Test Case ID: TC_REG_004
+## Search Functionality - Reset
 
-**Title:** Verify clearing the search term restores full task list  
+**Test Case ID:** TC_REG_004  
+**Title:** Verify search reset functionality restores complete task list  
 **Priority:** High  
 **Type:** Functional, Positive, Regression  
 **Functionality Area:** Search
@@ -106,9 +110,10 @@ This document outlines the initial set of regression test cases covering core Cr
 
 ---
 
-## Test Case ID: TC_REG_005
+## Search Functionality - Empty Results
 
-**Title:** Verify that searching for a non-existent task shows empty state  
+**Test Case ID:** TC_REG_005  
+**Title:** Verify empty state handling for non-matching search terms  
 **Priority:** Medium  
 **Type:** Functional, Negative, Regression  
 **Functionality Area:** Search
@@ -119,8 +124,10 @@ This document outlines the initial set of regression test cases covering core Cr
 
 ### Test Steps
 
-1. Type “XYZ_NOMATCH_ZYX” in the search input field
+1. Type "XYZ_NOMATCH_ZYX" in the search input field
 
 ### Expected Results
 
 - No tasks are displayed
+- Empty state message is shown to the user
+- Task counter shows zero results
