@@ -1,0 +1,126 @@
+# Regression Test Cases – React Cool Todo App
+
+This document outlines the initial set of regression test cases covering core Create, Search, and Delete user flows. These test cases are aligned with the application’s current UI and functionality and follow the structure of well-documented, maintainable automated scripts using the Playwright + Pytest stack.
+
+---
+
+## Test Case ID: TC_REG_001
+
+**Title:** Verify successful creation of a basic task  
+**Priority:** Critical  
+**Type:** Functional, Positive, Regression  
+**Functionality Area:** Create Task
+
+### Preconditions
+
+- Browser is open
+- User is on the main Todo page (`/`)
+- The task list is preferably empty (or reset by fixture)
+
+### Test Steps
+
+1. Click on the “Add Task” button
+2. Wait for the "Add New Task" page (`/add`) to load
+3. Enter a unique task title (e.g., "Test Task")
+4. Click on the “Create Task” button
+5. Wait for redirection to the main Todo page
+
+### Expected Results
+
+- The newly added task appears in the task list
+- Task title matches exactly
+- (Optional) Task counter reflects the correct number of tasks
+
+---
+
+## Test Case ID: TC_REG_002
+
+**Title:** Verify successful deletion of a task via menu confirmation  
+**Priority:** Critical  
+**Type:** Functional, Positive, Regression  
+**Functionality Area:** Delete Task
+
+### Preconditions
+
+- Task "REG_TASK_002_ToDelete" exists on the main page
+
+### Test Steps
+
+1. Locate the target task card
+2. Click the "task menu" (three-dot button)
+3. Select “Delete” from the dropdown
+4. Confirm deletion in the modal dialog
+
+### Expected Results
+
+- Task is removed from the task list
+- The confirmation dialog is dismissed
+
+---
+
+## Test Case ID: TC_REG_003
+
+**Title:** Verify searching for a specific task filters results accurately  
+**Priority:** High  
+**Type:** Functional, Positive, Regression  
+**Functionality Area:** Search
+
+### Preconditions
+
+- At least two distinct tasks exist: "REG_TASK_003_Unique", "REG_TASK_003_Other"
+
+### Test Steps
+
+1. Type “Unique” into the search input field
+2. Wait for the filtered results
+
+### Expected Results
+
+- Only "REG_TASK_003_Unique" is displayed
+- Other tasks are not visible
+- Total visible task cards: 1
+
+---
+
+## Test Case ID: TC_REG_004
+
+**Title:** Verify clearing the search term restores full task list  
+**Priority:** High  
+**Type:** Functional, Positive, Regression  
+**Functionality Area:** Search
+
+### Preconditions
+
+- At least two tasks are present
+- A search filter is currently applied
+
+### Test Steps
+
+1. Clear the search input field
+
+### Expected Results
+
+- All tasks reappear
+- No filters remain active
+- Task list count matches precondition
+
+---
+
+## Test Case ID: TC_REG_005
+
+**Title:** Verify that searching for a non-existent task shows empty state  
+**Priority:** Medium  
+**Type:** Functional, Negative, Regression  
+**Functionality Area:** Search
+
+### Preconditions
+
+- At least one task exists
+
+### Test Steps
+
+1. Type “XYZ_NOMATCH_ZYX” in the search input field
+
+### Expected Results
+
+- No tasks are displayed

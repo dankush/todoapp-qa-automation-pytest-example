@@ -10,7 +10,6 @@ from pages.todo_page import CoolTodoPage
 from tests.fixtures.page_fixtures import todo_page, add_task_page
 
 
-
 class TestTodoApp:
     """Regression test suite for the React Cool Todo App."""
 
@@ -48,3 +47,55 @@ class TestTodoApp:
 
         # Expected result: Task should no longer exist
         expect(todo_page.get_task_locator(task_title)).not_to_be_visible()
+
+    @pytest.mark.tms("TC_REG_003")
+    def test_search_filters_task_correctly(self, todo_page: CoolTodoPage) -> None:
+        """TC_REG_003: Verify searching for a specific task filters results accurately"""
+        unique_title = self.generate_unique_title("REG_TASK_003_Unique")
+        other_title = self.generate_unique_title("REG_TASK_003_Other")
+
+        # Precondition: Create two distinct tasks
+        todo_page.add_task(unique_title)
+        todo_page.add_task(other_title)
+
+        # Step 1-2: Search for the unique task
+        todo_page.search_tasks("Unique")
+
+        # Expected results: Only the matching task is visible
+        expect(todo_page.get_task_locator(unique_title)).to_be_visible()
+        expect(todo_page.get_task_locator(other_title)).not_to_be_visible()
+        assert todo_page.get_visible_task_count() == 1
+
+    @pytest.mark.tms("TC_REG_004")
+    def test_clear_search_restores_task_list(self, todo_page: CoolTodoPage) -> None:
+        """TC_REG_004: Verify clearing the search term restores full task list"""
+        title1 = self.generate_unique_title("REG_TASK_004_One")
+        title2 = self.generate_unique_title("REG_TASK_004_Two")
+
+        # Precondition: Create two tasks and apply search filter
+        todo_page.add_task(title1)
+        todo_page.add_task(title2)
+        todo_page.search_tasks("One")
+        expect(todo_page.get_task_locator(title1)).to_be_visible()
+        expect(todo_page.get_task_locator(title2)).not_to_be_visible()
+
+        # Step 1: Clear the search input
+        todo_page.clear_search()
+
+        # Expected results: All tasks are visible again
+        expect(todo_page.get_task_locator(title1)).to_be_visible()
+        expect(todo_page.get_task_locator(title2)).to_be_visible()
+        assert todo_page.get_visible_task_count() >= 2
+
+    @pytest.mark.tms("TC_REG_005")
+    def test_search_no_match_shows_empty(self, todo_page: CoolTodoPage) -> None:
+        """TC_REG_005: Verify that searching for a non-existent task shows empty state"""
+        # Precondition: Create a task to ensure we have content
+        title = self.generate_unique_title("REG_TASK_005_Visible")
+        todo_page.add_task(title)
+
+        # Step 1: Search for a term that won't match any tasks
+        todo_page.search_tasks("XYZ_NOMATCH_ZYX")
+
+        # Expected result: Empty state message is displayed
+        todo_page.expect_no_tasks()

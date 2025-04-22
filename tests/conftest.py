@@ -26,9 +26,14 @@ def browser_type(playwright: Playwright) -> str:
     return "chromium"
 
 @pytest.fixture(scope="session")
-def browser(playwright: Playwright, browser_type: str) -> Generator[Browser, None, None]:
-    """Fixture for creating a browser instance."""
-    browser_instance = getattr(playwright, browser_type).launch(headless=False)
+def browser(playwright: Playwright, browser_type: str, pytestconfig) -> Generator[Browser, None, None]:
+    """Fixture for creating a browser instance respecting --headed and --slowmo."""
+    slowmo = pytestconfig.getoption("slowmo")
+    headed = pytestconfig.getoption("headed")
+    browser_instance = getattr(playwright, browser_type).launch(
+        headless=not headed,
+        slow_mo=slowmo
+    )
     yield browser_instance
     browser_instance.close()
 

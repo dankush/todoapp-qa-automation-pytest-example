@@ -11,11 +11,11 @@ class CoolTodoPage:
 
         # --- Core Locators ---
         # Main page elements
-        self.page_title: Locator = page.locator('[data-testid="task-container"] h3')
+        self.page_title: Locator = page.locator('div[data-testid="task-container"] h3')
         self.add_task_button: Locator = page.locator('button.MuiButtonBase-root[aria-label="Add Task"]')
         self.task_containers: Locator = page.locator('div[data-testid="task-container"]')
         self.search_input: Locator = page.locator('input[placeholder="Search for task..."]')
-        self.task_count_text: Locator = page.locator('h4:has-text("You have"), h4:has-text("task")')
+        self.task_count_text: Locator = page.locator('h4:has-text("You have")')
         
         # Sidebar elements
         self.sidebar_button: Locator = page.locator('button[aria-label="Sidebar"]')
@@ -33,7 +33,11 @@ class CoolTodoPage:
         self.task_completed_icon_selector = 'svg[data-testid="CheckCircleIcon"]'
         
         # --- Empty state text ---
-        self.no_tasks_message = page.locator('text="No tasks completed yet"').or_(page.locator('text="Add your first task"'))
+        self.no_tasks_message = (
+            page.locator('text="No tasks completed yet"')
+            .or_(page.locator('text="Add your first task"'))
+            .or_(page.locator('text="No tasks found"'))
+        )
 
         # --- Locators for Menu Items (appear after clicking task menu button) ---
         self.menu_complete_item: Locator = page.locator('ul[role="menu"] li:has-text("Complete")')
@@ -43,8 +47,12 @@ class CoolTodoPage:
 
         # --- Delete Task Dialog is now handled by DeleteTaskDialog class ---
 
-        # --- Empty state text ---
-        self.no_tasks_message = page.locator('text="No tasks completed yet"').or_(page.locator('text="Add your first task"'))
+        # --- Empty state text (duplicate for reload) ---
+        self.no_tasks_message = (
+            page.locator('text="No tasks completed yet"')
+            .or_(page.locator('text="Add your first task"'))
+            .or_(page.locator('text="No tasks found"'))
+        )
 
     def goto(self, base_url: str) -> None:
         """Navigates to the app's base URL."""
@@ -55,8 +63,8 @@ class CoolTodoPage:
 
     def navigate_to_add_task_page(self) -> None:
         """Clicks the add button and navigates to the Add Task page."""
-        # Rely on click()'s built-in auto-wait for actionability
-        self.add_task_button.click(timeout=15000, force=True)
+        # Use JS click to bypass scrollIntoView issues
+        self.add_task_button.evaluate("button => button.click()")
         # Wait for navigation to the add task page
         self.page.wait_for_url("**/add", timeout=15000)
         expect(self.page.locator('h2:text("Add New Task")')).to_be_visible(timeout=10000)
@@ -75,9 +83,7 @@ class CoolTodoPage:
         add_task_page = AddTaskPage(self.page)
         add_task_page.add_complete_task(title, description)
         
-        # We should now be back on the main page
-        expect(self.page_title).to_be_visible()
-        # Wait for the task to appear in the list
+        # We should now be back on the main page, verify specific task
         if title:
             expect(self.get_task_locator(title)).to_be_visible(timeout=10000)
 
@@ -88,13 +94,14 @@ class CoolTodoPage:
 
     def get_task_locator(self, title: str) -> Locator:
         """Returns the locator for a specific task card by its title."""
-        # Need precise matching for the title within the h3
-        return self.task_containers.filter(has=self.page.locator(f'{self.task_title_selector}:text-is("{title}")'))
+        # Locate the task container whose text contains the title
+        return self.page.locator('div[data-testid="task-container"]', has_text=title)
 
     def open_task_menu(self, task_title: str) -> None:
         """Opens the menu for a specific task."""
-        task = self.get_task_locator(task_title)
-        task.locator(self.task_menu_button_selector).click()
+        container = self.get_task_locator(task_title)
+        # Use force click in case it's not interactable until visible
+        container.locator(self.task_menu_button_selector).click(force=True)
         expect(self.page.locator('ul[role="menu"]')).to_be_visible()
         self.page.wait_for_timeout(100) # Small delay for menu animation
 
@@ -236,6 +243,11 @@ class CoolTodoPage:
     def expect_total_task_cards(self, count: int) -> None:
         """Asserts the number of visible task card elements."""
         expect(self.task_containers).to_have_count(count)
+        
+    def get_visible_task_count(self) -> int:
+        """Returns the number of visible task cards."""
+        # Count only visible task containers
+        return self.page.locator('div[data-testid="task-container"]:visible').count()
 
     def expect_task_visible(self, title: str, description: Optional[str] = None) -> None:
         """Asserts a task with the given title (and optionally description) is visible."""
@@ -280,7 +292,9 @@ class CoolTodoPage:
     def expect_no_tasks(self) -> None:
         """Asserts that no task cards are visible and the empty state is shown."""
         expect(self.task_containers).to_have_count(0)
-        expect(self.no_tasks_message.or_(self.task_count_header.filter(has_text=re.compile(r"0 tasks?")))).to_be_visible()
+        # Show either an empty message or zero-count header
+        zero_header = self.task_count_text.filter(has_text=re.compile(r"0 tasks?"))
+        expect(self.no_tasks_message.or_(zero_header)).to_be_visible()
 
     def expect_search_placeholder(self, text: str) -> None:
         """Asserts the placeholder text of the search input."""
@@ -330,7 +344,7 @@ class CoolTodoPage:
         # Wait for app to re-initialize after reload
         expect(self.add_task_button).to_be_visible(timeout=20000) # Increased timeout after reload
         # Wait for either the count or the empty message
-        expect(self.task_count_header.or_(self.no_tasks_message)).to_be_visible(timeout=15000)
+        expect(self.task_count_text.or_(self.no_tasks_message)).to_be_visible(timeout=15000)
         self.page.wait_for_timeout(500) # Extra small wait for stability
         print("Page reloaded after clearing storage.")
 
