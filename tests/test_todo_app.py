@@ -1,6 +1,7 @@
 import pytest
 import sys
 import os
+from datetime import datetime
 from playwright.sync_api import expect
 
 # Add the project root to the Python path
@@ -8,79 +9,42 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from pages.todo_page import CoolTodoPage
 from tests.fixtures.page_fixtures import todo_page, add_task_page
 
-class TestTodoApp:
-    """Tests for the React Cool Todo App."""
-    
-    def test_add_task(self, todo_page: CoolTodoPage) -> None:
-        """Test adding a new task."""
-        task_title = "Test Task"
-        task_description = "This is a test task description"
-        # Add and verify the task
-        todo_page.add_task(task_title, task_description)
-        # todo_page.expect_task_visible(task_title, task_description)
-        # todo_page.expect_task_count(1)
-    
-    # def test_complete_task(self, todo_page: CoolTodoPage) -> None:
-    #     """Test marking a task as complete."""
-    #     # Add a task
-    #     task_title = "Complete Me"
-    #     todo_page.add_task(task_title)
-        
-    #     # Mark it as complete
-    #     todo_page.complete_task(task_title)
-        
-    #     # Verify it's marked as complete
-    #     todo_page.expect_task_completed(task_title, is_completed=True)
 
-    # def test_edit_task(self, todo_page: CoolTodoPage) -> None:
-    #     """Test editing a task."""
-    #     # Add a task
-    #     original_title = "Original Task"
-    #     original_description = "Original description"
-    #     todo_page.add_task(original_title, original_description)
-        
-    #     # Edit the task
-    #     new_title = "Updated Task"
-    #     new_description = "Updated description"
-    #     todo_page.edit_task(original_title, new_title, new_description)
-        
-    #     # Verify the task was updated
-    #     todo_page.expect_task_hidden(original_title)
-    #     todo_page.expect_task_visible(new_title, new_description)
-    
-    # def test_delete_task(self, todo_page: CoolTodoPage) -> None:
-    #     """Test deleting a task."""
-    #     # Add a task
-    #     task_title = "Delete Me"
-    #     todo_page.add_task(task_title)
-        
-    #     # Delete the task
-    #     todo_page.delete_task(task_title)
-        
-    #     # Verify task is gone
-    #     todo_page.expect_task_hidden(task_title)
-    #     todo_page.expect_task_count(0)
-    
-    # def test_search_tasks(self, todo_page: CoolTodoPage) -> None:
-    #     """Test searching for tasks."""
-    #     # Add multiple tasks
-    #     tasks = [
-    #         {"title": "First Task", "description": "Description 1"},
-    #         {"title": "Second Task", "description": "Description 2"},
-    #         {"title": "Another Task", "description": "Description 3"}
-    #     ]
-    #     todo_page.add_tasks(tasks)
-        
-    #     # Search for a specific task
-    #     todo_page.search_tasks("First")
-        
-    #     # Verify only matching tasks are visible
-    #     todo_page.expect_task_visible("First Task")
-    #     todo_page.expect_task_hidden("Second Task")
-    #     todo_page.expect_task_hidden("Another Task")
-        
-    #     # Clear search and verify all tasks are visible again
-    #     todo_page.clear_search()
-    #     todo_page.expect_total_task_cards(3)
-    
-    
+
+class TestTodoApp:
+    """Regression test suite for the React Cool Todo App."""
+
+    def generate_unique_title(self, base: str) -> str:
+        """Generates a unique task title based on timestamp."""
+        return f"{base} {datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+
+    @pytest.mark.tms("TC_REG_001")
+    def test_add_task_success(self, todo_page: CoolTodoPage) -> None:
+        """TC_REG_001: Verify successful creation of a basic task"""
+        task_title = self.generate_unique_title("Test Task")
+        task_description = "This task is created as part of a regression test"
+
+        # Step 1–4: Add task
+        todo_page.add_task(task_title, task_description)
+
+        # Step 5: Assert task appears in the list
+        expect(todo_page.get_task_locator(task_title)).to_be_visible()
+
+        # Verify task was added successfully by checking visibility
+        # (Already verified with the previous assertion)
+
+    @pytest.mark.tms("TC_REG_002")
+    def test_delete_task_success(self, todo_page: CoolTodoPage) -> None:
+        """ TC_REG_002: Verify deletion of a task via the menu"""
+        task_title = self.generate_unique_title("REG_TASK_002_ToDelete")
+        task_description = "Task to be deleted"
+
+        # Precondition: Create a task to delete
+        todo_page.add_task(task_title, task_description)
+        expect(todo_page.get_task_locator(task_title)).to_be_visible()
+
+        # Step 1–4: Delete the task
+        todo_page.delete_task(task_title)
+
+        # Expected result: Task should no longer exist
+        expect(todo_page.get_task_locator(task_title)).not_to_be_visible()

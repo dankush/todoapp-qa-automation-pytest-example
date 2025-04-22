@@ -1,6 +1,7 @@
 import re
 from typing import List, Dict, Optional
 from playwright.sync_api import Page, Locator, expect
+from pages.delete_task_dialog import DeleteTaskDialog
 
 class CoolTodoPage:
     """Page Object for the React Cool Todo App."""
@@ -40,9 +41,7 @@ class CoolTodoPage:
         self.menu_edit_item: Locator = page.locator('ul[role="menu"] li:has-text("Edit")')
         self.menu_delete_item: Locator = page.locator('ul[role="menu"] li:has-text("Delete")')
 
-        # --- Locators for Delete Confirmation ---
-        self.delete_confirm_dialog: Locator = page.locator('div[role="dialog"]:has-text("Delete Task?")')
-        self.delete_confirm_button: Locator = self.delete_confirm_dialog.locator('button:has-text("Delete")')
+        # --- Delete Task Dialog is now handled by DeleteTaskDialog class ---
 
         # --- Empty state text ---
         self.no_tasks_message = page.locator('text="No tasks completed yet"').or_(page.locator('text="Add your first task"'))
@@ -139,19 +138,25 @@ class CoolTodoPage:
              print(f"Task '{task_title}' not found for deletion.")
              return # Avoid error if task already gone
 
+        # Add explicit wait before opening menu
+        self.page.wait_for_timeout(500)  # 500ms pause for visibility
         self.open_task_menu(task_title)
+        self.page.wait_for_timeout(500)  # 500ms pause for visibility
         self.menu_delete_item.click()
 
-        expect(self.delete_confirm_dialog).to_be_visible()
+        # Use the DeleteTaskDialog page object to handle the confirmation
+        delete_dialog = DeleteTaskDialog(self.page)
+        
         if confirm:
-            self.delete_confirm_button.click()
-            expect(self.delete_confirm_dialog).to_be_hidden()
-            expect(task_locator).to_be_hidden(timeout=10000) # Wait for deletion
+            # Confirm deletion
+            delete_dialog.confirm_delete()
+            # Verify task was deleted
+            expect(task_locator).to_be_hidden(timeout=10000)  # Wait for deletion
         else:
-            # Find and click cancel button (assuming it exists)
-            self.delete_confirm_dialog.locator('button:has-text("Cancel")').click()
-            expect(self.delete_confirm_dialog).to_be_hidden()
-            expect(task_locator).to_be_visible() # Task should still be there
+            # Cancel deletion
+            delete_dialog.cancel()
+            # Verify task still exists
+            expect(task_locator).to_be_visible()
 
     def start_edit_task(self, task_title: str) -> None:
         """Opens the edit modal for a specific task."""
@@ -328,3 +333,25 @@ class CoolTodoPage:
         expect(self.task_count_header.or_(self.no_tasks_message)).to_be_visible(timeout=15000)
         self.page.wait_for_timeout(500) # Extra small wait for stability
         print("Page reloaded after clearing storage.")
+
+    def click_add_task_button(self) -> None:
+        """Clicks the Add Task button."""
+        self.add_task_button.click()
+
+    def wait_for_add_task_page(self) -> None:
+        """Waits for the Add Task page to load."""
+        self.page.wait_for_url("**/add")
+        expect(self.page.locator('h2:text("Add New Task")')).to_be_visible()
+
+    def enter_task_title(self, title: str) -> None:
+        """Enters the task title."""
+        self.page.locator('input[name="name"][placeholder="Enter task name"]').fill(title)
+
+    def click_create_task_button(self) -> None:
+        """Clicks the Create Task button."""
+        self.page.locator('button:text("Create Task")').click()
+
+    def wait_for_main_page(self) -> None:
+        """Waits for the main page to load after task creation."""
+        self.page.wait_for_url("**/")
+        expect(self.page_title).to_be_visible()

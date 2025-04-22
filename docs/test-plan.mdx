@@ -1,0 +1,110 @@
+# Test Plan: Regression Sanity Suite – Positive Functional Scenarios
+
+## 1. Objective
+
+The purpose of this test plan is to validate the **core positive-path functionalities** of a web-based application using a structured, automated regression sanity suite. The focus is on ensuring that key user actions — such as Create, Read, Delete, and Search (CRDS) — are stable, functional, and free of regression issues following new code changes or deployments.
+
+This plan is applied specifically to the **React Cool Todo App** available at  
+[https://react-cool-todo-app.netlify.app/](https://react-cool-todo-app.netlify.app/), which serves as the reference application for testing. The plan emphasizes high-priority user flows that are expected to work consistently in each release cycle and can be reliably validated via automation.
+
+## 2. Scope
+
+### In Scope
+
+- Core user flows such as task creation, task display, task deletion, and task search
+- Direct UI interactions (button clicks, dialog confirmations, input filtering)
+- Basic application state validation across user sessions (e.g., reloading or navigation)
+- Sanity-level test coverage suitable for smoke regression pipelines
+
+### Out of Scope
+
+- Negative-path scenarios (e.g., form errors, invalid inputs)
+- Task editing, styling, or advanced field options
+- Exploratory or manual QA
+- Device or browser compatibility testing
+- Accessibility, performance, or security testing
+- Deep backend or API-level validation
+- Sidebar or auxiliary features not related to CRDS flows
+
+## 3. Strategy and Approach
+
+### Automation-Driven Framework
+
+- **Language:** Python  
+- **Test Runner:** `pytest`  
+- **Automation Library:** `playwright-python` for UI testing  
+- **Design Pattern:** Page Object Model (POM) for abstraction and reusability
+
+### Directory and Code Structure
+
+| Component          | Location/Notes                                                   |
+|-------------------|-------------------------------------------------------------------|
+| Test files         | `tests/` directory; grouped by functionality                     |
+| Page classes       | `pages/` directory; each page has its own reusable class         |
+| Fixtures           | Defined in `fixtures/`; handle setup, teardown, and reset flows  |
+| Config             | `config.py` defines base URL, environment settings               |
+
+### Test Data
+
+- Dynamically generated values (e.g., unique task names using timestamps)
+- Static values used only when test logic requires deterministic identifiers
+
+### Locator Strategy
+
+- Primary locator strategy: `data-testid` attributes for test-specific elements
+- Fallback strategies in order of preference:
+  - ARIA roles and labels for accessibility-focused elements
+  - Semantic HTML elements with consistent class names
+  - Text content matching for static UI elements
+- Dynamic element identification:
+  - For task-specific elements: combine `data-testid` with task ID or title
+  - For list items: use nth-child selectors with data attributes
+- Avoid:
+  - XPath expressions
+  - Deeply nested CSS selectors
+  - Position-based selectors
+  - Selectors dependent on styling or layout
+
+### Assertion and Stability
+
+- Auto-wait assertions with Playwright's `expect` API (e.g., `to_be_visible()`, `to_have_text()`)
+- Tests designed to be idempotent, atomic, and resilient to UI timing variations
+
+## 4. Execution and Reporting
+
+### Execution
+
+- Tests are triggered via CLI using `pytest`, with support for test selection by marker/tag
+- Designed for both local runs and CI pipelines
+- Parallel execution supported with `pytest-xdist` if required
+
+### Reporting Options
+
+| Report Type     | Purpose                                                            |
+|-----------------|---------------------------------------------------------------------|
+| JUnit XML       | CI/CD system integration (e.g., Jenkins, GitHub Actions)           |
+| Allure HTML     | Comprehensive test result visualization (screenshots, timelines)   |
+| pytest-html     | Lightweight HTML report, optional for human-readable reviews       |
+
+### CI/CD Integration
+
+- Tests automatically run on push, PR, or merge events
+- Test failures block deployment when integrated with release workflows
+- Reports are archived and optionally uploaded as pipeline artifacts
+
+## 5. Deliverables
+
+- This test plan file (`test-plan.mdx`)
+- Sanity regression test scripts (`tests/test_app_sanity.py` or similar)
+- Page object implementation files (`pages/*.py`)
+- Test environment configuration files (`config.py`)
+- Generated test reports:  
+  - JUnit XML  
+  - Allure (if integrated)  
+  - Optional `pytest-html`  
+
+## Notes
+
+- This plan represents a **minimal, high-confidence regression suite** designed for continuous integration workflows.
+- All test cases should reflect expected user behavior — no negative or edge-case coverage is included in this suite.
+- The structure supports tagging (`@pytest.mark.sanity`) to allow flexible inclusion or exclusion in pipelines.
